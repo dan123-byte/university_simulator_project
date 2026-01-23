@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create College</title>
+</head>
+<body>
+    <h1>Create a New College</h1>
+
+    <form id="createCollegeForm">
+        <label for="name">College Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="tuition_fee">Tuition Fee:</label>
+        <input type="number" id="tuition_fee" name="tuition_fee" required><br><br>
+
+        <label for="base_expenses">Base Expenses:</label>
+        <input type="number" id="base_expenses" name="base_expenses" required><br><br>
+
+        <label for="year_established">Year Established:</label>
+        <input type="number" id="year_established" name="year_established"><br><br>
+
+        <button type="submit">Create College</button>
+    </form>
+
+    <p id="response"></p>
+
+    <script>
+        const form = document.getElementById("createCollegeForm");
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: form.name.value,
+                tuition_fee: parseInt(form.tuition_fee.value),
+                base_expenses: parseInt(form.base_expenses.value),
+                year_established: parseInt(form.year_established.value)
+            };
+
+            const response = await fetch("/create_college", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            document.getElementById("response").innerText = JSON.stringify(result, null, 2);
+        });
+    </script>
+</body>
+</html>

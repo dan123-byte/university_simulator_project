@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 from university import University, College, Program, StudentStats, FacultyStats
 from simulator import run_semester, view_status, create_program, hire_faculty, admit_students_roll, save_game, load_game
 
@@ -10,94 +10,71 @@ university = None
 
 @app.route("/")
 def home():
-    return "University Simulator API is running!"
+    return render_template("index.html", university=university)
+
+@app.route("/status")
+def status_page():
+    if not university:
+        return redirect(url_for("home"))
+    data = view_status(university)
+    return render_template("status.html", data=data)
 
 @app.route("/new_university", methods=["POST"])
 def new_university():
     global university
-    data = request.json
-    name = data.get("name", "My University")
-    budget = data.get("budget", 1000000)
-    year_established = data.get("year_established", 1900)
+    name = request.form.get("name", "My University")
+    budget = int(request.form.get("budget", 1000000))
+    year_established = int(request.form.get("year_established", 1900))
     university = University(name, year_established, budget)
-    return jsonify({"message": f"University '{name}' created!", "budget": university.budget})
+    return redirect(url_for("home"))
 
-@app.route("/run_semester", methods=["POST"])
-def run_semester_route():
+@app.route("/create_college", methods=["GET", "POST"])
+def create_college_page():
     global university
-    if not university:
-        return jsonify({"error": "No university loaded"}), 400
-    result = run_semester(university)
-    return jsonify(result)
+    if request.method == "POST":
+        name = request.form.get("name", "New College")
+        tuition_fee = int(request.form.get("tuition_fee", 20000))
+        base_expenses = int(request.form.get("base_expenses", 50000))
+        year_established = int(request.form.get("year_established", 1900))
+        college = College(name, tuition_fee, base_expenses, year_established)
+        university.colleges.append(college)
+        return redirect(url_for("status_page"))
+    return render_template("create_college.html")
 
-@app.route("/status", methods=["GET"])
-def status():
+@app.route("/create_program", methods=["GET", "POST"])
+def create_program_page():
     global university
-    if not university:
-        return jsonify({"error": "No university loaded"}), 400
-    return jsonify(view_status(university))
+    if request.method == "POST":
+        college_id = int(request.form.get("college_id"))
+        program_name = request.form.get("name", "General Studies")
+        capacity = int(request.form.get("capacity", 100))
+        college = next((c for c in university.colleges if c.id == college_id), None)
+        if college:
+            create_program(college, program_name, capacity, university)
+        return redirect(url_for("status_page"))
+    return render_template("create_program.html", university=university)
 
-@app.route("/create_program", methods=["POST"])
-def create_program_route():
+@app.route("/hire_faculty", methods=["GET", "POST"])
+def hire_faculty_page():
     global university
-    if not university:
-        return jsonify({"error": "No university loaded"}), 400
-    data = request.json
-    college_id = data.get("college_id")
-    program_name = data.get("name", "General Studies")
-    capacity = data.get("capacity", 100)
+    if request.method == "POST":
+        college_id = int(request.form.get("college_id"))
+        program_id = int(request.form.get("program_id"))
+        tier = request.form.get("tier")
+        college = next((c for c in university.colleges if c.id == college_id), None)
+        if college:
+            program = next((p for p in college.programs if p.id == program_id), None)
+            if program:
+                hire_faculty(program, university, tier)
+        return redirect(url_for("status_page"))
+    return render_template("hire_faculty.html", university=university)
 
-    college = next((c for c in university.colleges if c.id == college_id), None)
-    if not college:
-        return jsonify({"error": "College not found"}), 404
-
-    program = create_program(college, program_name, capacity, university)
-    return jsonify({"message": f"Program '{program.name}' created", "capacity": program.capacity})
-
-@app.route("/create_college", methods=["POST"])
-def create_college_route():
+@app.route("/run_semester")
+def run_semester_page():
     global university
-    if not university:
-        return jsonify({"error": "No university loaded"}), 400
-
-    data = request.json
-    name = data.get("name", "New College")
-    tuition_fee = data.get("tuition_fee", 20000)
-    base_expenses = data.get("base_expenses", 50000)
-    year_established = data.get("year_established", None)
-
-    college_id = len(university.colleges) + 1
-    year_established = year_established or university.year
-    college = College(college_id, name, year_established, tuition_fee, base_expenses)
-    university.colleges.append(college)
-
-    return jsonify({
-        "message": f"College '{college.name}' created!",
-        "college_id": college.id,
-        "tuition_fee": college.tuition_fee,
-        "base_expenses": college.base_expenses
-    })
-
-@app.route("/hire_faculty", methods=["POST"])
-def hire_faculty_route():
-    global university
-    if not university:
-        return jsonify({"error": "No university loaded"}), 400
-    data = request.json
-    college_id = data.get("college_id")
-    program_id = data.get("program_id")
-    tier = data.get("tier")
-
-    college = next((c for c in university.colleges if c.id == college_id), None)
-    if not college:
-        return jsonify({"error": "College not found"}), 404
-
-    program = next((p for p in college.programs if p.id == program_id), None)
-    if not program:
-        return jsonify({"error": "Program not found"}), 404
-
-    result = hire_faculty(program, university, tier)
-    return jsonify(result)
+    if university:
+        run_semester(university)
+    return redirect(url_for("status_page"))
 
 @app.route("/admit_students", methods=["POST"])
 def admit_students_route():

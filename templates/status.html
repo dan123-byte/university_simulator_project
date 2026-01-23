@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>University Status</title>
+</head>
+<body>
+    <h1>{{ data.name }} Status</h1>
+    <p>Budget: ${{ data.budget }}</p>
+    <p>Year: {{ data.year }}</p>
+    <p>University Points: {{ data.university_points }}</p>
+
+    <h2>Colleges</h2>
+    <ul>
+        {% for college in data.colleges %}
+        <li>
+            {{ college.name }} | Tuition: ${{ college.tuition }} | Points: {{ college.college_points }}
+            <ul>
+                {% for program in college.programs %}
+                <li>{{ program.name }} | Quality: {{ program.quality }} | Students: {{ program.students }}/{{ program.capacity }}</li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>
