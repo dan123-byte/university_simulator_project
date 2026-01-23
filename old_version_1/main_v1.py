@@ -25,7 +25,10 @@ def run_semester(university):
         college.college_points = 0
 
         for program in college.programs:
-            admit_students_roll(program, university)
+            if program.student_stats.total < program.capacity:
+                admit_students_roll(program, university)
+            else:
+                print(f"  Program '{program.name}' is full. No new students admitted.")
 
             f = program.faculty_stats
             quality_increase = f.class_s * 3 + f.class_a * 2 + f.class_b * 1
@@ -259,8 +262,11 @@ def admit_students_roll(program, university):
 
     base_demand = random.randint(int(0.5 * program.capacity), int(1.5 * program.capacity))
 
-    admitted = min(int(base_demand * (0.5 + program.quality / 10)), remaining_capacity)
-    admitted = max(10, admitted)
+    raw_admitted = int(base_demand * (0.5 + program.quality / 10))
+    admitted = min(raw_admitted, remaining_capacity)
+
+    if remaining_capacity >= 10:
+        admitted = max(10, admitted)
 
     program.student_stats.total += admitted
 
