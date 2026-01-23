@@ -2,6 +2,7 @@ class University:
     def __init__(self, name, year_established, budget):
         self.name = name
         self.year_established = year_established
+        self.year_date = year_established
         self.year = 1
         self.budget = budget
 

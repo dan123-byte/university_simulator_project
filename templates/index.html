@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>University Simulator</title>
-</head>
-<body>
-    <h1>University Simulator</h1>
-    {% if university %}
-        <p><strong>{{ university.name }}</strong> | Budget: ${{ university.budget }} | Year: {{ university.year }}</p>
-        <a href="{{ url_for('status_page') }}">View Status</a><br>
-        <a href="{{ url_for('create_college_page') }}">Create College</a><br>
-        <a href="{{ url_for('create_program_page') }}">Create Program</a><br>
-        <a href="{{ url_for('hire_faculty_page') }}">Hire Faculty</a><br>
-        <a href="{{ url_for('run_semester_page') }}">Run Semester</a>
-    {% else %}
-        <form action="{{ url_for('new_university') }}" method="POST">
-            <label>University Name:</label><input type="text" name="name"><br>
-            <label>Budget:</label><input type="number" name="budget" value="1000000"><br>
-            <label>Year Established:</label><input type="number" name="year_established" value="1900"><br>
-            <input type="submit" value="Create University">
-        </form>
-    {% endif %}
-</body>
+    <head>
+        <title>University Simulator</title>
+    </head>
+    <body>
+        <h1>University Simulator</h1>
+        {% if university %}
+            <p><strong>{{ university.name }}</strong> | Budget: ${{ university.budget }} | Year: {{ university.year }}</p>
+            <a href="{{ url_for('status_page') }}">View Status</a><br>
+            <a href="{{ url_for('create_college_page') }}">Create College</a><br>
+            <a href="{{ url_for('create_program_page') }}">Create Program</a><br>
+            <a href="{{ url_for('hire_faculty_page') }}">Hire Faculty</a><br>
+            <a href="{{ url_for('run_semester_page') }}">Run Semester</a>
+        {% else %}
+            <form action="{{ url_for('new_university') }}" method="POST">
+                <label>University Name:</label><input type="text" name="name"><br>
+                <label>Budget:</label><input type="number" name="budget" value="1000000"><br>
+                <label>Year Established:</label><input type="number" name="year_established" value="1900"><br>
+                <input type="submit" value="Create University">
+            </form>
+        {% endif %}
+    </body>
 </html>

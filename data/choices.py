@@ -1,0 +1,25 @@
+from university import University, College, Program, StudentStats, FacultyStats
+
+#   College(1, "name", year_established, tuition_fee, base_expenses),
+colleges = [
+    College(1, "Engineering", 1990, 50000, 20000),
+    College(2, "Business", 1985, 45000, 18000),
+    College(3, "Arts", 1970, 30000, 15000),
+    College(4, "Medicine", 2000, 60000, 25000),
+    College(5, "Law", 1995, 55000, 22000),
+    College(6, "Science", 1980, 40000, 18000),
+    College(7, "Education", 1975, 35000, 16000),
+    College(8, "Architecture", 2005, 52000, 20000),
+    College(9, "Music", 1965, 30000, 14000),
+    College(10, "Social Sciences", 1992, 38000, 17000),
+    College(11, "Pharmacy", 1998, 45000, 20000),
+    College(12, "Nursing", 2002, 40000, 18000),
+    College(13, "Fine Arts", 1978, 33000, 15000),
+    College(14, "Computer Science", 1995, 50000, 21000),
+    College(15, "Journalism", 1985, 36000, 16000),
+    College(16, "Environmental Studies", 2001, 42000, 19000),
+    College(17, "Mathematics", 1980, 38000, 17000),
+    College(18, "Psychology", 1990, 40000, 18000),
+    College(19, "Political Science", 1985, 39000, 17000),
+    College(20, "Economics", 1992, 45000, 20000),
+]

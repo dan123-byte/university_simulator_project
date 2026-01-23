@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 from university import University, College, Program, StudentStats, FacultyStats
 from simulator import run_semester, view_status, create_program, hire_faculty, admit_students_roll, save_game, load_game
+from data.choices import colleges
 
 app = Flask(__name__)
 
@@ -16,8 +17,7 @@ def home():
 def status_page():
     if not university:
         return redirect(url_for("home"))
-    data = view_status(university)
-    return render_template("status.html", data=data)
+    return render_template("status.html", data=university)
 
 @app.route("/new_university", methods=["POST"])
 def new_university():
@@ -32,14 +32,25 @@ def new_university():
 def create_college_page():
     global university
     if request.method == "POST":
-        name = request.form.get("name", "New College")
-        tuition_fee = int(request.form.get("tuition_fee", 20000))
-        base_expenses = int(request.form.get("base_expenses", 50000))
-        year_established = int(request.form.get("year_established", 1900))
-        college = College(name, tuition_fee, base_expenses, year_established)
-        university.colleges.append(college)
+        college_id = int(request.form.get("college_id"))
+        tuition_fee = int(request.form.get("tuition_fee"))
+
+        chosen_college = next((c for c in colleges if c.id == college_id), None)
+        if chosen_college:
+            if any(c.id == chosen_college.id for c in university.colleges):
+                return redirect(url_for("status_page"))
+
+            college = College(
+                id=chosen_college.id,
+                name=chosen_college.name,
+                year_established=university.year_date,
+                tuition_fee=tuition_fee,
+                base_expenses=chosen_college.base_expenses
+            )
+            university.colleges.append(college)
         return redirect(url_for("status_page"))
-    return render_template("create_college.html")
+
+    return render_template("create_college.html", colleges=colleges)
 
 @app.route("/create_program", methods=["GET", "POST"])
 def create_program_page():

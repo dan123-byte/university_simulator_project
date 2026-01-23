@@ -1,28 +1,70 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>University Status</title>
-</head>
-<body>
-    <h1>{{ data.name }} Status</h1>
-    <p>Budget: ${{ data.budget }}</p>
-    <p>Year: {{ data.year }}</p>
-    <p>University Points: {{ data.university_points }}</p>
+    <head>
+        <title>University Status</title>
+    </head>
+    <body>
+        <h1>{{ data.name }}</h1>
+        <p>Budget: ${{ "{:,}".format(data.budget | default(0)) }}</p>
+        <p>Year: {{ data.year_date | default(0) }}</p>
+        <p>Turn: {{ data.year | default(1) }}</p>
+        <p>University Points: {{ data.university_points | default(0) }}</p>
+        <p>University Ranking: {{ data.university_ranking | default(0) }}</p>
 
-    <h2>Colleges</h2>
-    <ul>
-        {% for college in data.colleges %}
-        <li>
-            {{ college.name }} | Tuition: ${{ college.tuition }} | Points: {{ college.college_points }}
+        <h2>Colleges</h2>
+        {% if data.colleges %}
             <ul>
-                {% for program in college.programs %}
-                <li>{{ program.name }} | Quality: {{ program.quality }} | Students: {{ program.students }}/{{ program.capacity }}</li>
-                {% endfor %}
-            </ul>
-        </li>
-        {% endfor %}
-    </ul>
+            {% for college in data.colleges %}
+                <li>
+                    <strong>{{ college.name }}</strong> |
+                    Year Established: {{ college.year_established }} |
+                    Tuition: ${{ "{:,}".format(college.tuition_fee | default(0)) }}
+                    Points: {{ college.college_points | default(0) }} |
+                    Ranking: {{ college.college_ranking | default(0) }}
 
-    <a href="{{ url_for('home') }}">Back</a>
-</body>
+                    {% if college.programs %}
+                    <ul>
+                        {% for program in college.programs %}
+                        <li>
+                            <strong>{{ program.name }}</strong> |
+                            Quality: {{ program.quality | default(0) }} |
+                            Points: {{ program.program_points | default(0) }} |
+                            Students: {{ program.student_stats.total | default(0) }}/{{ program.capacity | default(0) }} ({{ program.size | default('N/A') }})
+                            <ul>
+                                <li>
+                                    Faculty: Total={{ program.faculty_stats.total | default(0) }},
+                                    S={{ program.faculty_stats.class_s | default(0) }},
+                                    A={{ program.faculty_stats.class_a | default(0) }},
+                                    B={{ program.faculty_stats.class_b | default(0) }},
+                                    C={{ program.faculty_stats.class_c | default(0) }},
+                                    D={{ program.faculty_stats.class_d | default(0) }},
+                                    Expenses: ${{ program.faculty_stats.total_expenses | default(0) | int | format(",") }}
+                                </li>
+                                <li>
+                                    Students: Total={{ program.student_stats.total | default(0) }},
+                                    S={{ program.student_stats.class_s | default(0) }},
+                                    A={{ program.student_stats.class_a | default(0) }},
+                                    B={{ program.student_stats.class_b | default(0) }},
+                                    C={{ program.student_stats.class_c | default(0) }},
+                                    D={{ program.student_stats.class_d | default(0) }}
+                                </li>
+                            </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <p>No programs yet.</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No colleges added yet.</p>
+        {% endif %}
+
+        <br>
+        <a href="{{ url_for('home') }}">
+            <button type="button">Back</button>
+        </a>
+    </body>
 </html>

@@ -3,6 +3,7 @@ import random
 import json
 
 def run_semester(university):
+    university.year_date += 1
     university.year += 1
     university.university_points = 0
 
