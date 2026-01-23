@@ -9,45 +9,112 @@ colleges = [
 
 FACULTY_TIERS = ["S", "A", "B", "C", "D"]
 
+def run_semester(university):
+    print(f"\n--- Running Semester {university.year} ---\n")
+    university.year += 1
+
+    university.university_points = 0
+
+    for college in university.colleges:
+        print(f"Processing College: {college.name}")
+
+        university.budget -= college.base_expenses
+        print(f"  Deducted base expenses: ${college.base_expenses:,}")
+
+        college.college_points = 0
+
+        for program in college.programs:
+            admit_students_roll(program, university)
+
+            f = program.faculty_stats
+            quality_increase = f.class_s * 3 + f.class_a * 2 + f.class_b * 1
+            program.quality += quality_increase
+            program.quality = min(program.quality, 100)
+            print(f"  Program '{program.name}' quality increased by {quality_increase}, now {program.quality}")
+
+            student_points = (
+                program.student_stats.class_s * 10 +
+                program.student_stats.class_a * 6 +
+                program.student_stats.class_b * 4 +
+                program.student_stats.class_c * 2 +
+                program.student_stats.class_d * 1
+            )
+
+            faculty_points = (
+                f.class_s * 10 +
+                f.class_a * 7 +
+                f.class_b * 5 +
+                f.class_c * 3 +
+                f.class_d * 1
+            )
+
+            program.program_points = student_points + faculty_points
+            print(f"    Program points earned this semester: {program.program_points}")
+
+            college.college_points += program.program_points
+
+            s_leave = int(program.student_stats.class_s * 0.1)
+            a_leave = int(program.student_stats.class_a * 0.05)
+            d_leave = int(program.student_stats.class_d * 0.2)
+            total_leaving = s_leave + a_leave + d_leave
+
+            program.student_stats.total -= total_leaving
+            program.student_stats.class_s -= s_leave
+            program.student_stats.class_a -= a_leave
+            program.student_stats.class_d -= d_leave
+
+            print(f"  {total_leaving} students graduated/dropped from '{program.name}'")
+
+            faculty_expense = f.total_expenses
+            university.budget -= faculty_expense
+            print(f"  Paid faculty salaries: ${faculty_expense:,}")
+
+        university.university_points += college.college_points
+        print(f"College '{college.name}' earned {college.college_points} points this semester.")
+
+    print(f"\nSemester {university.year} completed.")
+    print(f"University points: {university.university_points}")
+    print(f"University budget: ${university.budget:,}\n")
+
 def main_menu():
     print("\n--- MAIN MENU ---")
     print("1. Pick a College to Establish")
     print("2. Create a Program for a College")
     print("3. View University Status")
     print("4. Hire Faculty for a Program")
-    print("5. Admit Students")
+    print("5. Run Semester")
     print("6. Exit")
-    choice = input("Select an option (1–5): ").strip()
+    choice = input("Select an option (1–6): ").strip()
     return choice
 
 def view_status(uni):
     print("\n--- CURRENT STATUS ---")
-    print(f"University: {uni.name}, Budget: {uni.budget}, Year: {uni.year}")
+    print(f"University: {uni.name}, Budget: ${uni.budget:,}, Year: {uni.year}")
+    print(f"University Points: {uni.university_points}, University Ranking: {uni.university_ranking}\n")
 
     if not uni.colleges:
         print("No colleges added yet.")
     else:
         for college in uni.colleges:
-            print(f"\nCollege: {college.name}, Tuition: {college.tuition_fee:,}")
+            print(f"\nCollege: {college.name}, Tuition: ${college.tuition_fee:,}")
+            print(f"College Points: {college.college_points}, College Ranking: {college.college_ranking}")
 
             if hasattr(college, "programs") and college.programs:
                 for program in college.programs:
                     print(f"  - Program: {program.name}, Quality: {program.quality}, "
-                        f"Students: {program.student_stats.total}/{program.capacity} ({program.size})")
+                          f"Points: {program.program_points}, "
+                          f"Students: {program.student_stats.total}/{program.capacity} ({program.size})")
 
                     f = program.faculty_stats
                     print(f"    Faculty: Total={f.total}, "
-                        f"S={f.class_s}, A={f.class_a}, B={f.class_b}, "
-                        f"C={f.class_c}, D={f.class_d}, "
-                        f"Expenses=${f.total_expenses:,}")
+                          f"S={f.class_s}, A={f.class_a}, B={f.class_b}, "
+                          f"C={f.class_c}, D={f.class_d}, "
+                          f"Expenses=${f.total_expenses:,}")
 
-                    if hasattr(program, "student_stats"):
-                        s = program.student_stats
-                        print(f"    Students: Total={s.total}, "
-                            f"S={s.class_s}, A={s.class_a}, B={s.class_b}, "
-                            f"C={s.class_c}, D={s.class_d}")
-                    else:
-                        print("    No students yet.")
+                    s = program.student_stats
+                    print(f"    Students: Total={s.total}, "
+                          f"S={s.class_s}, A={s.class_a}, B={s.class_b}, "
+                          f"C={s.class_c}, D={s.class_d}")
             else:
                 print("  No programs yet.")
 
@@ -316,19 +383,13 @@ def main():
 
             hire_faculty(selected_program, uni)
 
-        # Admit Students
+        # Run Semester
         elif choice == "5":
             if not uni.colleges:
                 print("You must have a college first.")
                 continue
 
-            for college in uni.colleges:
-                if not college.programs:
-                    print(f"{college.name} has no programs yet.")
-                    continue
-
-                for program in college.programs:
-                    admit_students_roll(program, uni)
+            run_semester(uni)
 
         # Exit
         elif choice == "6":
