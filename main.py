@@ -15,7 +15,8 @@ def main_menu():
     print("2. Create a Program for a College")
     print("3. View University Status")
     print("4. Hire Faculty for a Program")
-    print("5. Exit")
+    print("5. Admit Students")
+    print("6. Exit")
     choice = input("Select an option (1–5): ").strip()
     return choice
 
@@ -180,6 +181,48 @@ def hire_faculty(program, university):
         except ValueError:
             print("Please enter a valid number.")
 
+def admit_students_roll(program, university):
+    remaining_capacity = program.capacity - program.student_stats.total
+    if remaining_capacity <= 0:
+        print(f"{program.name} is already full!")
+        return
+
+    base_demand = random.randint(int(0.5 * program.capacity), int(1.5 * program.capacity))
+
+    admitted = min(int(base_demand * (0.5 + program.quality / 10)), remaining_capacity)
+    admitted = max(10, admitted)
+
+    program.student_stats.total += admitted
+
+    s_pct = min(0.05 + program.quality / 100, 0.1)
+    a_pct = 0.2 + program.quality / 50
+    b_pct = 0.25
+    c_pct = 0.2
+
+    s_count = int(admitted * s_pct)
+    a_count = int(admitted * a_pct)
+    b_count = int(admitted * b_pct)
+    c_count = int(admitted * c_pct)
+    d_count = admitted - (s_count + a_count + b_count + c_count)
+
+    program.student_stats.class_s += s_count
+    program.student_stats.class_a += a_count
+    program.student_stats.class_b += b_count
+    program.student_stats.class_c += c_count
+    program.student_stats.class_d += d_count
+
+    college_tuition = None
+    for college in university.colleges:
+        if program in college.programs:
+            college_tuition = college.tuition_fee
+            break
+
+    if college_tuition is None:
+        college_tuition = 10000
+    university.budget += admitted * college_tuition
+
+    print(f"{admitted} students admitted to {program.name} ({program.size})")
+
 def main():
     print("Hello, Welcome to the University Creation Simulator (Pending)!")
     print("Please input the name of the university to start the game... ")
@@ -273,8 +316,22 @@ def main():
 
             hire_faculty(selected_program, uni)
 
-        # Exit
+        # Admit Students
         elif choice == "5":
+            if not uni.colleges:
+                print("You must have a college first.")
+                continue
+
+            for college in uni.colleges:
+                if not college.programs:
+                    print(f"{college.name} has no programs yet.")
+                    continue
+
+                for program in college.programs:
+                    admit_students_roll(program, uni)
+
+        # Exit
+        elif choice == "6":
             print("Exiting game. Goodbye!")
             break
 
