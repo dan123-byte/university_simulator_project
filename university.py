@@ -54,11 +54,11 @@ class FacultyStats():
         self.class_c = 0
         self.class_d = 0
 
-        self.class_s_expense = 0
-        self.class_a_expense = 0
-        self.class_b_expense = 0
-        self.class_c_expense = 0
-        self.class_d_expense = 0
+        self.class_s_expense = 200_000
+        self.class_a_expense = 150_000
+        self.class_b_expense = 100_000
+        self.class_c_expense = 70_000
+        self.class_d_expense = 50_000
 
     @property
     def total_expenses(self):
