@@ -31,7 +31,8 @@ def view_status(uni):
 
             if hasattr(college, "programs") and college.programs:
                 for program in college.programs:
-                    print(f"  - Program: {program.name}, Quality: {program.quality}")
+                    print(f"  - Program: {program.name}, Quality: {program.quality}, "
+                        f"Students: {program.student_stats.total}/{program.capacity} ({program.size})")
 
                     f = program.faculty_stats
                     print(f"    Faculty: Total={f.total}, "
@@ -70,12 +71,32 @@ def create_program(college):
     if not program_name:
         program_name = "General Studies"
 
+    print("Choose program size:")
+    print("1. Small (20–50 students)")
+    print("2. Medium (50–200 students)")
+    print("3. Large (200–500 students)")
+
+    size_choice = input("Enter choice (1–3): ").strip()
+    if size_choice == "1":
+        capacity = int(input("Enter capacity for Small program (20–50): "))
+        capacity = max(20, min(capacity, 50))
+    elif size_choice == "2":
+        capacity = int(input("Enter capacity for Medium program (50–200): "))
+        capacity = max(50, min(capacity, 200))
+    elif size_choice == "3":
+        capacity = int(input("Enter capacity for Large program (200–500): "))
+        capacity = max(200, min(capacity, 500))
+    else:
+        capacity = 100
+        print("Invalid choice, defaulting to Medium (100 students)")
+
     program_id = len(college.programs) + 1
     program_year = 1900
 
-    program = Program(program_id, program_name, program_year)
+    program = Program(program_id, program_name, program_year, capacity)
     college.programs.append(program)
 
+    print(f"Program '{program.name}' established with capacity {program.capacity} ({program.size})")
     return program
 
 def hire_faculty(program, university):

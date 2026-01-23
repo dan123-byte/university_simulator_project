@@ -24,17 +24,32 @@ class College:
         self.college_ranking = 0
 
 class Program:
-    def __init__(self,id, name, year_established):
+    def __init__(self,id, name, year_established, capacity=None):
         self.id = id
         self.name = name
         self.year_established = year_established
         self.quality = 1
+
+        if capacity is None:
+            self.capacity = 50
+        else:
+            self.capacity = capacity
+
+        self.size = self.classify_size()
 
         self.student_stats = StudentStats()
         self.faculty_stats = FacultyStats()
 
         self.program_points = 0
         self.program_ranking = 0
+
+    def classify_size(self):
+        if self.capacity <= 50:
+            return "Small"
+        elif self.capacity <= 200:
+            return "Medium"
+        else:
+            return "Large"
 
 class StudentStats:
     def __init__(self):
