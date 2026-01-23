@@ -59,7 +59,7 @@ class FacultyStats():
         self.class_b_expense = 0
         self.class_c_expense = 0
         self.class_d_expense = 0
-    
+
     @property
     def total_expenses(self):
         return (
