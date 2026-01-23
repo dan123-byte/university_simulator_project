@@ -60,7 +60,7 @@ class StudentStats:
         self.class_c = 0
         self.class_d = 0
 
-class FacultyStats():
+class FacultyStats:
     def __init__(self):
         self.total = 0
         self.class_s = 0

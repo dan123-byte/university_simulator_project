@@ -1,5 +1,6 @@
-from university import University, College, Program
+from university import University, College, Program, StudentStats, FacultyStats
 import random
+import json
 
 colleges = [
     College(1, "Engineering", 1990, 50000, 20000),
@@ -84,7 +85,9 @@ def main_menu():
     print("4. Hire Faculty for a Program")
     print("5. Run Semester")
     print("6. Exit")
-    choice = input("Select an option (1–6): ").strip()
+    print("7. Save Game")
+    print("8. Load Game")
+    choice = input("Select an option (1–8): ").strip()
     return choice
 
 def view_status(uni):
@@ -290,6 +293,106 @@ def admit_students_roll(program, university):
 
     print(f"{admitted} students admitted to {program.name} ({program.size})")
 
+def save_game(university, filename="savegame.json"):
+    data = {
+        "name": university.name,
+        "year_established": university.year_established,
+        "year": university.year,
+        "budget": university.budget,
+        "university_points": university.university_points,
+        "university_ranking": university.university_ranking,
+        "colleges": []
+    }
+
+    for college in university.colleges:
+        college_data = {
+            "id": college.id,
+            "name": college.name,
+            "year_established": college.year_established,
+            "tuition_fee": college.tuition_fee,
+            "base_expenses": college.base_expenses,
+            "college_points": college.college_points,
+            "college_ranking": college.college_ranking,
+            "programs": []
+        }
+
+        for program in college.programs:
+            program_data = {
+                "id": program.id,
+                "name": program.name,
+                "year_established": program.year_established,
+                "capacity": program.capacity,
+                "size": program.size,
+                "quality": program.quality,
+                "program_points": program.program_points,
+                "program_ranking": program.program_ranking,
+                "student_stats": vars(program.student_stats),
+                "faculty_stats": vars(program.faculty_stats)
+            }
+            college_data["programs"].append(program_data)
+
+        data["colleges"].append(college_data)
+
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
+    print(f"Game saved to '{filename}'!")
+
+def load_game(filename="savegame.json"):
+    try:
+        with open(filename, "r") as f:
+            data = json.load(f)
+
+        uni = University(data["name"], data["year_established"], data["budget"])
+        uni.year = data.get("year", 1)
+        uni.university_points = data.get("university_points", 0)
+        uni.university_ranking = data.get("university_ranking", 0)
+
+        for college_data in data.get("colleges", []):
+            college = College(
+                college_data["id"],
+                college_data["name"],
+                college_data["year_established"],
+                college_data["tuition_fee"],
+                college_data["base_expenses"]
+            )
+            college.college_points = college_data.get("college_points", 0)
+            college.college_ranking = college_data.get("college_ranking", 0)
+
+            for program_data in college_data.get("programs", []):
+                program = Program(
+                    program_data["id"],
+                    program_data["name"],
+                    program_data["year_established"],
+                    program_data["capacity"]
+                )
+                program.size = program_data["size"]
+                program.quality = program_data["quality"]
+                program.program_points = program_data["program_points"]
+                program.program_ranking = program_data.get("program_ranking", 0)
+
+                s_stats = StudentStats()
+                f_stats = FacultyStats()
+
+                for key, value in program_data["student_stats"].items():
+                    setattr(s_stats, key, value)
+
+                for key, value in program_data["faculty_stats"].items():
+                    setattr(f_stats, key, value)
+
+                program.student_stats = s_stats
+                program.faculty_stats = f_stats
+
+                college.programs.append(program)
+
+            uni.colleges.append(college)
+
+        print(f"Game loaded from '{filename}'!")
+        return uni
+
+    except FileNotFoundError:
+        print(f"No save file found at '{filename}'. Starting a new game.")
+        return None
+
 def main():
     print("Hello, Welcome to the University Creation Simulator (Pending)!")
     print("Please input the name of the university to start the game... ")
@@ -396,8 +499,15 @@ def main():
             print("Exiting game. Goodbye!")
             break
 
+        elif choice == "7":
+            save_game(uni)
+
+        elif choice == "8":
+            loaded_uni = load_game()
+            if loaded_uni:
+                uni = loaded_uni
         else:
-            print("Invalid menu option. Please choose 1–4.")
+            print("Invalid menu option. Please choose 1–8.")
 
 if __name__ == "__main__":
     main()
